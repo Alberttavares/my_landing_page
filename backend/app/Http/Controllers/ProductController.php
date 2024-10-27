@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Product as RequestsProduct;
-use App\Models\Product;
-use Illuminate\Http\Request;
+use App\Models\Product;;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ProductController extends Controller
 {
@@ -38,6 +39,12 @@ class ProductController extends Controller
     public function store(RequestsProduct $request): JsonResponse
     {
         $data = $request->validated();
+
+        if($request->hasFile('image')){
+            $path = $request->file('image')->store('products', 'public');
+            $data['image'] = url('storage/'.$path);
+        }
+
         $product =$this->products->create($data);
         return response()->json($product, Response::HTTP_OK);
     }
@@ -66,6 +73,20 @@ class ProductController extends Controller
     {
         $data = $request->validated();
         $product = $this->products->findOrFail($id);
+
+        if($request->hasFile('image')){
+            try{
+                $image_name = explode('products/', $product->image);
+                Storage::disk('public')->delete('products/'. $image_name[1]);
+
+            }catch(Throwable){
+
+            }finally{
+                $path = $request->file('image')->store('products', 'public');
+                $data['image'] = url('storage/'.$path);
+            }
+        }
+
         $product->update($data);
         return response()->json($product, Response::HTTP_OK);
     }

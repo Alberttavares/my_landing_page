@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Post as RequestsPost;
 use App\Models\Post;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -38,6 +39,12 @@ class PostController extends Controller
     public function store(RequestsPost $request): JsonResponse
     {
         $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('posts', 'public');
+            $data['image'] = url('storage/'.$path);
+        }
+
         $post =$this->posts->create($data);
         return response()->json($post, Response::HTTP_OK);
     }
@@ -66,6 +73,19 @@ class PostController extends Controller
     {
         $data = $request->validated();
         $post = $this->posts->findOrFail($id);
+
+        if ($request->hasFile('image')) {
+            try {
+                $image_name = explode('posts/', $post->image);
+                Storage::disk('public')->delete('posts/'.$image_name[1]);
+            } catch (Throwable) {
+
+            } finally {
+                $path = $request->file('image')->store('posts', 'public');
+                $data['image'] = url('storage/'.$path);
+            }
+        }
+
         $post->update($data);
         return response()->json($post, Response::HTTP_OK);
     }
