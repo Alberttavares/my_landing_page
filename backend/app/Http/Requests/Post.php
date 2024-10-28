@@ -23,7 +23,7 @@ class Post extends FormRequest
     {
         return [
             'title' => ['required', 'min:3', 'max:80'],
-            'image' => ['required', 'image', 'mimes:jpeg,png,gif'],
+            'image' => ['required', 'image', 'mimes:jpeg,png,gif,webp'],
             'description' => ['required', 'min:3', 'max:200']
         ];
     }

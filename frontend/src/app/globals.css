@@ -3,5 +3,9 @@
 @tailwind utilities;
 
 body {
-  background-color: aliceblue;
+  margin-top: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(155, 158, 160);
 }
